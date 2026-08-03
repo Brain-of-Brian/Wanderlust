@@ -1,10 +1,3 @@
-//
-//  ContentView.swift
-//  Wanderlust
-//
-//  Created by Brian Mo on 8/3/26.
-//
-
 import SwiftUI
 
 struct ContentView: View {
