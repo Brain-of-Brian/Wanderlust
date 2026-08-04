@@ -1,5 +1,10 @@
 import SwiftUI
 
+enum AppState {
+    case game
+    case passport
+    case trivia
+}
 struct ContentView: View {
     var body: some View {
         VStack {
@@ -26,6 +31,11 @@ struct GuessingGame: View {
     @State private var CurrentAttempt: Int = 0
     @State private var UsedLetters: [String: Color] = [:]
     
+    @State private var InvalidLandmark: Bool = false
+    @State private var AvaliableLandmarks: [String] = ["PETRA", "LUXOR", "TULUM", "TOKYO"]
+    
+    @State private var CurrentScreen: AppState = .game
+    @State private var InfoPopup: Bool = false
     let CorrectLetter: Color = Color(red: 0.1, green: 0.35, blue: 0.2)
     let MisplacedLetter: Color = Color(red: 0.6, green: 0.5, blue: 0.1)
     let WrongLetter: Color = Color(red: 0.35, green: 0.25, blue: 0.15)
@@ -38,10 +48,9 @@ struct GuessingGame: View {
     ]
     
     var body: some View {
-        VStack {
-            Text("Guess the landmark")
-                .font(.title)
-            VStack(spacing: 8) {
+        NavigationStack {
+            VStack {
+                VStack(spacing: 8) {
                 ForEach(0..<6, id: \.self){ Row in
                     HStack(spacing: 8) {
                         ForEach(0..<5, id: \.self){ Column in
@@ -105,6 +114,36 @@ struct GuessingGame: View {
                 dismissButton: .default(Text("OK"))
             )
         }
+        .alert(isPresented: $InvalidLandmark) {
+            Alert(
+                title: Text("Invalid Landmark"),
+                message: Text("If this is a specific landmark you want to add to the game, please submit a suggestion in the feedback form.")
+                    .font(.caption),
+                dismissButton: .default(Text("OK"))
+            )
+        }
+    }
+        .ignoresSafeArea(edges: .top)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar{
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    // home page
+                } label: {
+                    Image(systemName: "house")
+                }
+            }
+            ToolbarItem(placement: .principal) {
+                Text("Wanderlust")
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    // info tab
+                } label: {
+                    Image(systemName: "info.circle")
+                }
+            }
+        }
     }
     
     func GetLetterColor(for row: Int, and column: Int) -> String {
@@ -166,6 +205,11 @@ struct GuessingGame: View {
     
     func SubmitGuess() {
         guard CurrentGuess.count == 5 else {
+            return
+        }
+        
+        guard AvaliableLandmarks.contains(CurrentGuess) else {
+            InvalidLandmark = true
             return
         }
         for (column,letter) in CurrentGuess.enumerated() {
