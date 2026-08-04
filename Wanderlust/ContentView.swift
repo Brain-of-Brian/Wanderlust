@@ -29,30 +29,36 @@ struct GuessingGame: View {
     let CorrectLetter: Color = Color(red: 0.1, green: 0.35, blue: 0.2)
     let MisplacedLetter: Color = Color(red: 0.6, green: 0.5, blue: 0.1)
     let WrongLetter: Color = Color(red: 0.35, green: 0.25, blue: 0.15)
-    let EmptyLetter = Color.gray
+    let EmptyLetter = Color.clear
     let Gray = Color.gray.opacity(0.5)
     let KeyboardRows = [
         ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
         ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
-        ["ENTER", "Z", "X", "C", "V", "B", "N", "M", "DELETE"]
+        ["ENTER", "Z", "X", "C", "V", "B", "N", "M", "⌫"]
     ]
     
     var body: some View {
         VStack {
             Text("Guess the landmark")
                 .font(.title)
-            VStack {
+            VStack(spacing: 8) {
                 ForEach(0..<6, id: \.self){ Row in
-                    HStack {
+                    HStack(spacing: 8) {
                         ForEach(0..<5, id: \.self){ Column in
                             let letter = GetLetterColor(for: Row, and: Column)
                             let BackgroundColor = GetTileColor(for: Row, at: Column)
                             
                             Text(letter)
+                                .font(.title)
+                                .bold()
+                                .foregroundStyle(.black)
                                 .frame(width: 50, height: 60)
                                 .background(BackgroundColor)
-                                .foregroundStyle(.white)
-                                .cornerRadius(10)
+                                .cornerRadius(4)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 4)
+                                        .stroke(Color.black, lineWidth: 1)
+                                )
                         }
                     }
                 }
@@ -61,10 +67,7 @@ struct GuessingGame: View {
             
             Spacer()
             
-            if !GameOver {
-                Text(GameWon ? "You guessed the landmark correctly!" : "Try again tomorrow!")
-            }
-            VStack {
+            VStack(spacing: 6) {
                 ForEach(KeyboardRows, id: \.self){ row in
                     HStack {
                         ForEach(row, id: \.self){ key in
@@ -72,26 +75,38 @@ struct GuessingGame: View {
                                 handleKeyPress(key)
                             } label: {
                                 Text(key)
-                                    .font(.system(size: key.count > 1 ? 12 : 16, weight: .bold))
-                                    .frame(maxWidth: key.count > 1 ? 55 : 32, minHeight: 45)
-                                    .foregroundStyle(.white)
-                                    .cornerRadius(5)
-                                
+                                    .font(.headline)
+                                    .foregroundStyle(.black)
+                                    .bold()
+                                    .frame(minWidth: key.count > 1 ? 55 : 32, minHeight: 45)
+                                    .background(GetKeyColor(for: key))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 4)
+                                            .stroke(Color.black, lineWidth: 1)
+                                    )
+                                    .cornerRadius(4)
                             }
+                            .buttonStyle(.plain)
                             .disabled(GameOver)
                         }
-                        
                     }
                 }
             }
-            .padding(.bottom, 10)
-            
+            .padding(.bottom, 50)
         }
         .padding()
         .onAppear{
             SetupDaily()
         }
+        .alert(isPresented: $GameOver) {
+            Alert(
+                title: Text(GameWon ? "You Win!" : "Game Over"),
+                message: Text(GameWon ? "You guessed the landmark correctly!" : "Try again tomorrow!"),
+                dismissButton: .default(Text("OK"))
+            )
+        }
     }
+    
     func GetLetterColor(for row: Int, and column: Int) -> String {
         let word = (row == CurrentAttempt) ? CurrentGuess : guess[row]
         let index = word.index(word.startIndex, offsetBy: column, limitedBy: word.endIndex)
@@ -100,11 +115,13 @@ struct GuessingGame: View {
         }
         return ""
     }
+    
     func GetTileColor(for row: Int, at column: Int) -> Color {
-        if row >= CurrentAttempt && (row != CurrentAttempt || CurrentGuess.count <= column) {
+        guard row < CurrentAttempt else {
             return EmptyLetter
         }
-        let word = (row == CurrentAttempt) ? CurrentGuess : guess[row]
+        
+        let word = guess[row]
         guard column < word.count else {
             return EmptyLetter
         }
@@ -123,17 +140,19 @@ struct GuessingGame: View {
         }
         return WrongLetter
     }
+    
     func GetKeyColor(for key: String) -> Color {
         if key.count > 1 {
-            return .gray
+            return Gray
         }
         return UsedLetters[key] ?? Gray
     }
+    
     func handleKeyPress(_ key: String) {
         if key == "ENTER" {
             SubmitGuess()
         }
-        else if key == "BACKSPACE" {
+        else if key == "⌫" {
             if !CurrentGuess.isEmpty {
                 CurrentGuess.removeLast()
             }
@@ -144,6 +163,7 @@ struct GuessingGame: View {
             }
         }
     }
+    
     func SubmitGuess() {
         guard CurrentGuess.count == 5 else {
             return
@@ -182,8 +202,9 @@ struct GuessingGame: View {
             CurrentGuess = ""
         }
     }
+    
     func SetupDaily() {
-        let landmarks: [String] = ["Eiffel Tower", "Great Wall of China", "Petra", "Machu Picchu", "Christ the Redeemer"]
+        let landmarks: [String] = ["PETRA", "ALAMO", "LUXOR", "KYOTO", "TULUM"]
         var calender = Calendar.current
         if let timezone = TimeZone(identifier: "America/Chicago"){
             calender.timeZone = timezone
@@ -193,10 +214,12 @@ struct GuessingGame: View {
         let index = DayOfYear % landmarks.count
         SecretWord = landmarks[index]
     }
+    
     func Stats(won: Bool) {
         
     }
 }
+
 #Preview {
     GuessingGame()
 }
