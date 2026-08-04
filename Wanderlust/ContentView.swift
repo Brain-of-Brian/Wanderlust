@@ -1,18 +1,43 @@
 import SwiftUI
 
-enum AppState {
-    case game
-    case passport
-    case trivia
-}
 struct ContentView: View {
+    @State private var CurrentTab: InfoState = .Game
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
-            GuessingGame()
+        NavigationStack {
+            NavigationLink(destination: GuessingGame(currentTab: $CurrentTab) , label: {
+                Text("Wanderlust Guessing Game")
+            })
+            Group {
+                switch CurrentTab {
+                case .Game:
+                    GuessingGame(currentTab: $CurrentTab)
+                case .Passport:
+                    Text("passport placeholder")
+                case .Trivia:
+                    Text("trivia placeholder")
+                }
+            }
+            HStack {
+                Button{
+                    CurrentTab = .Game
+                } label: {
+                    Text("Guessing Game")
+                }
+                Spacer()
+                
+                Button{
+                    CurrentTab = .Passport
+                } label: {
+                    Text("Passport")
+                }
+                
+                Button{
+                    CurrentTab = .Trivia
+                } label: {
+                    Text("Trivia")
+                }
+                Spacer()
+            }
         }
         .padding()
     }
@@ -22,6 +47,11 @@ struct ContentView: View {
     ContentView()
 }
 
+enum InfoState {
+    case Game
+    case Passport
+    case Trivia
+}
 struct GuessingGame: View {
     @State private var SecretWord: String = "PETRA" // test landmark
     @State private var guess: [String] = Array(repeating: "", count: 6)
@@ -33,9 +63,9 @@ struct GuessingGame: View {
     
     @State private var InvalidLandmark: Bool = false
     @State private var AvaliableLandmarks: [String] = ["PETRA", "LUXOR", "TULUM", "TOKYO"]
+    @Environment(\.dismiss) var Dismiss
+    @Binding var currentTab: InfoState
     
-    @State private var CurrentScreen: AppState = .game
-    @State private var InfoPopup: Bool = false
     let CorrectLetter: Color = Color(red: 0.1, green: 0.35, blue: 0.2)
     let MisplacedLetter: Color = Color(red: 0.6, green: 0.5, blue: 0.1)
     let WrongLetter: Color = Color(red: 0.35, green: 0.25, blue: 0.15)
@@ -87,7 +117,7 @@ struct GuessingGame: View {
                                     .font(.headline)
                                     .foregroundStyle(.black)
                                     .bold()
-                                    .frame(minWidth: key.count > 1 ? 55 : 32, minHeight: 45)
+                                    .frame(minWidth: key.count > 1 ? 45 : 28, minHeight: 45)
                                     .background(GetKeyColor(for: key))
                                     .overlay(
                                         RoundedRectangle(cornerRadius: 4)
@@ -123,18 +153,20 @@ struct GuessingGame: View {
             )
         }
     }
+        .navigationBarBackButtonHidden(true)
         .ignoresSafeArea(edges: .top)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar{
             ToolbarItem(placement: .topBarLeading) {
                 Button {
-                    // home page
+                    Dismiss()
                 } label: {
                     Image(systemName: "house")
                 }
             }
             ToolbarItem(placement: .principal) {
                 Text("Wanderlust")
+                    .font(.title2)
             }
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
@@ -265,5 +297,6 @@ struct GuessingGame: View {
 }
 
 #Preview {
-    GuessingGame()
+    GuessingGame(currentTab: .constant(.Game))
 }
+
