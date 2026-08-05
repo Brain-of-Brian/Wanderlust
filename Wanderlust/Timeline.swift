@@ -4,3 +4,4 @@
 // Polishing the guessing game
 // Improving the UX for the guessing game
 // Creation of navigation bar
+// Polishing navigation bar

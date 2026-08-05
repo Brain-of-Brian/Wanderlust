@@ -1,14 +1,13 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var CurrentTab: InfoState = .Game
+    @State private var CurrentTab: Tabs = .Game
     var body: some View {
         NavigationStack {
-            NavigationLink(destination: GuessingGame(currentTab: $CurrentTab) , label: {
-                Text("Wanderlust Guessing Game")
-            })
             Group {
                 switch CurrentTab {
+                case .Dashboard:
+                    Dashboard()
                 case .Game:
                     GuessingGame(currentTab: $CurrentTab)
                 case .Passport:
@@ -16,27 +15,6 @@ struct ContentView: View {
                 case .Trivia:
                     Text("trivia placeholder")
                 }
-            }
-            HStack {
-                Button{
-                    CurrentTab = .Game
-                } label: {
-                    Text("Guessing Game")
-                }
-                Spacer()
-                
-                Button{
-                    CurrentTab = .Passport
-                } label: {
-                    Text("Passport")
-                }
-                
-                Button{
-                    CurrentTab = .Trivia
-                } label: {
-                    Text("Trivia")
-                }
-                Spacer()
             }
         }
         .padding()
@@ -47,7 +25,8 @@ struct ContentView: View {
     ContentView()
 }
 
-enum InfoState {
+enum Tabs {
+    case Dashboard
     case Game
     case Passport
     case Trivia
@@ -64,7 +43,9 @@ struct GuessingGame: View {
     @State private var InvalidLandmark: Bool = false
     @State private var AvaliableLandmarks: [String] = ["PETRA", "LUXOR", "TULUM", "TOKYO"]
     @Environment(\.dismiss) var Dismiss
-    @Binding var currentTab: InfoState
+    @Binding var currentTab: Tabs
+    
+    @State private var InfoPopup: Bool = false
     
     let CorrectLetter: Color = Color(red: 0.1, green: 0.35, blue: 0.2)
     let MisplacedLetter: Color = Color(red: 0.6, green: 0.5, blue: 0.1)
@@ -78,9 +59,8 @@ struct GuessingGame: View {
     ]
     
     var body: some View {
-        NavigationStack {
-            VStack {
-                VStack(spacing: 8) {
+        VStack {
+            VStack(spacing: 8) {
                 ForEach(0..<6, id: \.self){ Row in
                     HStack(spacing: 8) {
                         ForEach(0..<5, id: \.self){ Column in
@@ -152,14 +132,13 @@ struct GuessingGame: View {
                 dismissButton: .default(Text("OK"))
             )
         }
-    }
         .navigationBarBackButtonHidden(true)
         .ignoresSafeArea(edges: .top)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar{
             ToolbarItem(placement: .topBarLeading) {
                 Button {
-                    Dismiss()
+                    currentTab = .Dashboard
                 } label: {
                     Image(systemName: "house")
                 }
@@ -167,14 +146,21 @@ struct GuessingGame: View {
             ToolbarItem(placement: .principal) {
                 Text("Wanderlust")
                     .font(.title2)
+                    .bold()
             }
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
-                    // info tab
+InfoPopup = true
                 } label: {
                     Image(systemName: "info.circle")
                 }
             }
+        }
+        .padding(.vertical)
+        .sheet(isPresented: $InfoPopup) {
+            InfoPopupView()
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
         }
     }
     
@@ -300,3 +286,29 @@ struct GuessingGame: View {
     GuessingGame(currentTab: .constant(.Game))
 }
 
+struct Dashboard: View {
+    var body: some View {
+        /*@START_MENU_TOKEN@*//*@PLACEHOLDER=Hello, world!@*/Text("Hello, world!")/*@END_MENU_TOKEN@*/
+    }
+}
+
+#Preview {
+    Dashboard()
+}
+
+struct InfoPopupView: View {
+    var body: some View {
+        VStack {
+            Text("How to play")
+                .font(.title)
+                .bold()
+            Text("Placeholder")
+            Spacer()
+        }
+        .padding(.top, 20)
+    }
+}
+
+#Preview {
+    InfoPopupView()
+}
