@@ -1,4 +1,5 @@
 import SwiftUI
+import MapKit
 
 struct ContentView: View {
     @State private var CurrentTab: Tabs = .Game
@@ -7,7 +8,7 @@ struct ContentView: View {
             Group {
                 switch CurrentTab {
                 case .Dashboard:
-                    Dashboard()
+                    Dashboard(currentTab: $CurrentTab)
                 case .Game:
                     GuessingGame(currentTab: $CurrentTab)
                 case .Passport:
@@ -42,10 +43,11 @@ struct GuessingGame: View {
     
     @State private var InvalidLandmark: Bool = false
     @State private var AvaliableLandmarks: [String] = ["PETRA", "LUXOR", "TULUM", "TOKYO"]
-    @Environment(\.dismiss) var Dismiss
     @Binding var currentTab: Tabs
     
     @State private var InfoPopup: Bool = false
+    @State private var MapPopup: Bool = false
+    
     
     let CorrectLetter: Color = Color(red: 0.1, green: 0.35, blue: 0.2)
     let MisplacedLetter: Color = Color(red: 0.6, green: 0.5, blue: 0.1)
@@ -141,6 +143,7 @@ struct GuessingGame: View {
                     currentTab = .Dashboard
                 } label: {
                     Image(systemName: "house")
+                        .foregroundStyle(.black)
                 }
             }
             ToolbarItem(placement: .principal) {
@@ -149,10 +152,19 @@ struct GuessingGame: View {
                     .bold()
             }
             ToolbarItem(placement: .topBarTrailing) {
-                Button {
-InfoPopup = true
-                } label: {
-                    Image(systemName: "info.circle")
+                HStack {
+                    Button {
+                        MapPopup = true
+                    } label: {
+                        Image(systemName: "map.fill")
+                            .foregroundStyle(.black)
+                    }
+                    Button {
+                        InfoPopup = true
+                    } label: {
+                        Image(systemName: "info.circle")
+                            .foregroundStyle(.black)
+                    }
                 }
             }
         }
@@ -161,6 +173,12 @@ InfoPopup = true
             InfoPopupView()
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $MapPopup) {
+            MapPopupView()
+                .presentationDetents([.large])
+                .presentationDragIndicator(.hidden)
+            
         }
     }
     
@@ -285,17 +303,45 @@ InfoPopup = true
 #Preview {
     GuessingGame(currentTab: .constant(.Game))
 }
-
+// Navigation Bar 1
 struct Dashboard: View {
+    @Binding var currentTab: Tabs
     var body: some View {
-        /*@START_MENU_TOKEN@*//*@PLACEHOLDER=Hello, world!@*/Text("Hello, world!")/*@END_MENU_TOKEN@*/
+        VStack {
+            Spacer()
+            ZStack {
+            RoundedRectangle(cornerRadius: 30)
+                .stroke(Color.black, lineWidth: 2)
+            VStack {
+                Text("Dashboard")
+                    .font(.title)// temp
+                Button {
+                    currentTab = .Game
+                } label: {
+                    Text("Guessing game") // temp
+                }
+                Button {
+                    currentTab = .Passport
+                } label: {
+                    Text("Passport") // temp
+                }
+                Button {
+                    currentTab = .Trivia
+                } label: {
+                    Text("Trivia") // temp
+                }
+            }
+        }
+        .frame(width: 200, height: 50)
+            Spacer()
+        }
     }
 }
 
 #Preview {
-    Dashboard()
+    Dashboard(currentTab: .constant(.Dashboard))
 }
-
+// Navigation Bar 3
 struct InfoPopupView: View {
     var body: some View {
         VStack {
@@ -311,4 +357,32 @@ struct InfoPopupView: View {
 
 #Preview {
     InfoPopupView()
+}
+// Navigation Bar 2
+struct MapPopupView: View {
+    @Environment(\.dismiss) var Dismiss
+    var body: some View {
+        ZStack {
+            Map()
+            VStack {
+                HStack {
+                    Spacer()
+                    Button {
+                    Dismiss()
+                } label: {
+                    Text("Close")
+                        .bold()
+                        .foregroundStyle(.black)
+                }
+                }
+                .padding(.horizontal)
+                Spacer()
+            }
+            .padding(.vertical)
+        }
+    }
+}
+
+#Preview {
+    MapPopupView()
 }

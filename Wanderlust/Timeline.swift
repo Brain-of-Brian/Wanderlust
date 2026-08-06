@@ -5,3 +5,4 @@
 // Improving the UX for the guessing game
 // Creation of navigation bar
 // Polishing navigation bar
+// Implementing the map aspect and improving the dashboard
