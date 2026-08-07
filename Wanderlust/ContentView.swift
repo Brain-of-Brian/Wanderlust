@@ -4,6 +4,7 @@ import MapKit
 struct ContentView: View {
     @State var InfoTab: Int = 0
     @State private var CurrentTab: Tabs = .Game
+    @State private var DiscoveredLandmarks: [String] = []
     var body: some View {
         NavigationStack {
             Group {
@@ -11,7 +12,7 @@ struct ContentView: View {
                 case .Dashboard:
                     Dashboard(currentTab: $CurrentTab)
                 case .Game:
-                    GuessingGame(currentTab: $CurrentTab, InfoTab: $InfoTab)
+                    GuessingGame(currentTab: $CurrentTab, InfoTab: $InfoTab, DiscoveredLandmarks: $DiscoveredLandmarks)
                 case .Passport:
                     Passport(currentTab: $CurrentTab, InfoTab: $InfoTab)
                 case .Trivia:
@@ -49,6 +50,8 @@ struct GuessingGame: View {
     @State private var InfoPopup: Bool = false
     @State private var MapPopup: Bool = false
     @Binding var InfoTab: Int
+    
+    @Binding var DiscoveredLandmarks: [String]
     
     let CorrectLetter: Color = Color(red: 0.1, green: 0.35, blue: 0.2)
     let MisplacedLetter: Color = Color(red: 0.6, green: 0.5, blue: 0.1)
@@ -177,7 +180,7 @@ struct GuessingGame: View {
                 .presentationDragIndicator(.visible)
         }
         .sheet(isPresented: $MapPopup) {
-            MapPopupView()
+            MapPopupView(DiscoveredLandmarks: $DiscoveredLandmarks)
                 .presentationDetents([.large])
                 .presentationDragIndicator(.hidden)
             
@@ -249,6 +252,10 @@ struct GuessingGame: View {
             InvalidLandmark = true
             return
         }
+        
+        if !DiscoveredLandmarks.contains(CurrentGuess) {
+            DiscoveredLandmarks.append(CurrentGuess)
+        }
         for (column,letter) in CurrentGuess.enumerated() {
             let lettersArray = String(letter)
             let secretArray = Array(SecretWord)
@@ -302,7 +309,7 @@ struct GuessingGame: View {
 }
 
 #Preview {
-    GuessingGame(currentTab: .constant(.Game), InfoTab: .constant(0))
+    GuessingGame(currentTab: .constant(.Game), InfoTab: .constant(0), DiscoveredLandmarks: .constant([]))
 }
 // Navigation Bar 1
 struct Dashboard: View {
@@ -379,31 +386,46 @@ struct InfoPopupView: View {
 }
 // Navigation Bar 2
 struct MapPopupView: View {
+    @Binding var DiscoveredLandmarks: [String]
     @Environment(\.dismiss) var Dismiss
-    var body: some View {
-        ZStack {
-            Map()
-            VStack {
-                HStack {
-                    Spacer()
-                    Button {
-                        Dismiss()
-                    } label: {
-                        Text("Close")
-                            .bold()
-                            .foregroundStyle(.black)
+    
+    let landmarkCoordinates: [String: CLLocationCoordinate2D] = [
+        "PETRA": CLLocationCoordinate2D(latitude: 30.3285, longitude: 35.4444),
+        "LUXOR": CLLocationCoordinate2D(latitude: 25.6872, longitude: 32.6396),
+        "TULUM": CLLocationCoordinate2D(latitude: 20.2114, longitude: -87.4654),
+        "TOKYO": CLLocationCoordinate2D(latitude: 35.6762, longitude: 139.6503),
+        "ALAMO": CLLocationCoordinate2D(latitude: 29.4258, longitude: -98.4861),
+        "KYOTO": CLLocationCoordinate2D(latitude: 35.0116, longitude: 135.7681)]
+        var body: some View {
+            ZStack {
+                Map {
+                    ForEach(DiscoveredLandmarks, id: \.self) { landmark in
+                        if let coordinate = landmarkCoordinates[landmark] {
+                            Marker(landmark, coordinate: coordinate)
+                        }
                     }
                 }
-                .padding(.horizontal)
-                Spacer()
+                VStack {
+                    HStack {
+                        Spacer()
+                        Button {
+                            Dismiss()
+                        } label: {
+                            Text("Close")
+                                .bold()
+                                .foregroundStyle(.black)
+                        }
+                    }
+                    .padding(.horizontal)
+                    Spacer()
+                }
+                .padding(.vertical)
             }
-            .padding(.vertical)
         }
-    }
 }
 
 #Preview {
-    MapPopupView()
+    MapPopupView(DiscoveredLandmarks: .constant(["PETRA"]))
 }
 
 struct Passport: View {

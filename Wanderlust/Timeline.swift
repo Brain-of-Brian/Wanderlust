@@ -7,3 +7,4 @@
 // Polishing navigation bar
 // Implementing the map aspect and improving the dashboard
 // Creating the passport for Wanderlust
+// Implementing the landmark location markers
