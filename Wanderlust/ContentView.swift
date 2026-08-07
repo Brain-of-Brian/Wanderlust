@@ -161,8 +161,8 @@ struct GuessingGame: View {
                             .foregroundStyle(.black)
                     }
                     Button {
-                        InfoPopup = true
                         InfoTab = 0
+                        InfoPopup = true
                     } label: {
                         Image(systemName: "info.circle")
                             .foregroundStyle(.black)
@@ -172,7 +172,7 @@ struct GuessingGame: View {
         }
         .padding(.vertical)
         .sheet(isPresented: $InfoPopup) {
-            InfoPopupView(InfoTab: InfoTab)
+            InfoPopupView(InfoTab: $InfoTab)
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
         }
@@ -183,7 +183,6 @@ struct GuessingGame: View {
             
         }
     }
-    
     func GetLetterColor(for row: Int, and column: Int) -> String {
         let word = (row == CurrentAttempt) ? CurrentGuess : guess[row]
         let index = word.index(word.startIndex, offsetBy: column, limitedBy: word.endIndex)
@@ -345,7 +344,7 @@ struct Dashboard: View {
 }
 // Navigation Bar 3
 struct InfoPopupView: View {
-    let InfoTab: Int
+    @Binding var InfoTab: Int
     var body: some View {
         VStack {
             if InfoTab == 0 {
@@ -376,7 +375,7 @@ struct InfoPopupView: View {
 }
 
 #Preview {
-    InfoPopupView(InfoTab: 0)
+    InfoPopupView(InfoTab: .constant(0))
 }
 // Navigation Bar 2
 struct MapPopupView: View {
@@ -459,8 +458,8 @@ struct Passport: View {
             ToolbarItem(placement: .topBarTrailing) {
                 HStack {
                     Button {
-                        InfoPopup = true
                         InfoTab = 1
+                        InfoPopup = true
                     } label: {
                         Image(systemName: "info.circle")
                             .foregroundStyle(.black)
@@ -469,7 +468,7 @@ struct Passport: View {
             }
         }
         .sheet(isPresented: $InfoPopup) {
-            InfoPopupView(InfoTab: InfoTab)
+            InfoPopupView(InfoTab: $InfoTab)
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
         }
