@@ -2,6 +2,7 @@ import SwiftUI
 import MapKit
 
 struct ContentView: View {
+    @State var InfoTab: Int = 0
     @State private var CurrentTab: Tabs = .Game
     var body: some View {
         NavigationStack {
@@ -10,9 +11,9 @@ struct ContentView: View {
                 case .Dashboard:
                     Dashboard(currentTab: $CurrentTab)
                 case .Game:
-                    GuessingGame(currentTab: $CurrentTab)
+                    GuessingGame(currentTab: $CurrentTab, InfoTab: $InfoTab)
                 case .Passport:
-                    Text("passport placeholder")
+                    Passport(currentTab: $CurrentTab, InfoTab: $InfoTab)
                 case .Trivia:
                     Text("trivia placeholder")
                 }
@@ -47,7 +48,7 @@ struct GuessingGame: View {
     
     @State private var InfoPopup: Bool = false
     @State private var MapPopup: Bool = false
-    
+    @Binding var InfoTab: Int
     
     let CorrectLetter: Color = Color(red: 0.1, green: 0.35, blue: 0.2)
     let MisplacedLetter: Color = Color(red: 0.6, green: 0.5, blue: 0.1)
@@ -161,6 +162,7 @@ struct GuessingGame: View {
                     }
                     Button {
                         InfoPopup = true
+                        InfoTab = 0
                     } label: {
                         Image(systemName: "info.circle")
                             .foregroundStyle(.black)
@@ -170,7 +172,7 @@ struct GuessingGame: View {
         }
         .padding(.vertical)
         .sheet(isPresented: $InfoPopup) {
-            InfoPopupView()
+            InfoPopupView(InfoTab: InfoTab)
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
         }
@@ -301,7 +303,7 @@ struct GuessingGame: View {
 }
 
 #Preview {
-    GuessingGame(currentTab: .constant(.Game))
+    GuessingGame(currentTab: .constant(.Game), InfoTab: .constant(0))
 }
 // Navigation Bar 1
 struct Dashboard: View {
@@ -310,29 +312,29 @@ struct Dashboard: View {
         VStack {
             Spacer()
             ZStack {
-            RoundedRectangle(cornerRadius: 30)
-                .stroke(Color.black, lineWidth: 2)
-            VStack {
-                Text("Dashboard")
-                    .font(.title)// temp
-                Button {
-                    currentTab = .Game
-                } label: {
-                    Text("Guessing game") // temp
-                }
-                Button {
-                    currentTab = .Passport
-                } label: {
-                    Text("Passport") // temp
-                }
-                Button {
-                    currentTab = .Trivia
-                } label: {
-                    Text("Trivia") // temp
+                RoundedRectangle(cornerRadius: 30)
+                    .stroke(Color.black, lineWidth: 2)
+                VStack {
+                    Text("Dashboard")
+                        .font(.title)// temp
+                    Button {
+                        currentTab = .Game
+                    } label: {
+                        Text("Guessing game") // temp
+                    }
+                    Button {
+                        currentTab = .Passport
+                    } label: {
+                        Text("Passport") // temp
+                    }
+                    Button {
+                        currentTab = .Trivia
+                    } label: {
+                        Text("Trivia") // temp
+                    }
                 }
             }
-        }
-        .frame(width: 200, height: 50)
+            .frame(width: 200, height: 100)
             Spacer()
         }
     }
@@ -343,20 +345,38 @@ struct Dashboard: View {
 }
 // Navigation Bar 3
 struct InfoPopupView: View {
+    let InfoTab: Int
     var body: some View {
         VStack {
-            Text("How to play")
-                .font(.title)
-                .bold()
-            Text("Placeholder")
-            Spacer()
+            if InfoTab == 0 {
+                Text("How to play")
+                    .font(.title)
+                    .bold()
+                Text("Placeholder")
+                Spacer()
+            }
+            else if InfoTab == 1 {
+                Text("What is passport?")
+                    .font(.title)
+                    .bold()
+                Spacer()
+            }
+            else if InfoTab == 2 {
+                Text("placeholder")
+                    .font(.title)
+                    .bold()
+            }
+            else {
+                Text("No info available")
+                    .font(.title)
+            }
         }
         .padding(.top, 20)
     }
 }
 
 #Preview {
-    InfoPopupView()
+    InfoPopupView(InfoTab: 0)
 }
 // Navigation Bar 2
 struct MapPopupView: View {
@@ -368,12 +388,12 @@ struct MapPopupView: View {
                 HStack {
                     Spacer()
                     Button {
-                    Dismiss()
-                } label: {
-                    Text("Close")
-                        .bold()
-                        .foregroundStyle(.black)
-                }
+                        Dismiss()
+                    } label: {
+                        Text("Close")
+                            .bold()
+                            .foregroundStyle(.black)
+                    }
                 }
                 .padding(.horizontal)
                 Spacer()
@@ -385,4 +405,87 @@ struct MapPopupView: View {
 
 #Preview {
     MapPopupView()
+}
+
+struct Passport: View {
+    @State private var InfoPopup: Bool = false
+    @Binding var currentTab: Tabs
+    @State private var Countries: [String] = ["China", "USA", "France", "Spain", "italy"]
+    @State private var SearchCountry: String = ""
+    @Binding var InfoTab : Int
+    var body: some View {
+        List {
+            ForEach(CountryFilter, id: \.self) { Country in
+                ZStack {
+                    Image(systemName: "Globe") // Will import images later on when I polish Passport
+                    VStack{
+                        HStack{
+                            Spacer()
+                            Text(Country)
+                                .bold()
+                        }
+                        .padding(.horizontal)
+                        Spacer()
+                    }
+                    .padding(.vertical)
+                    
+                }
+                .frame(maxWidth: .infinity, minHeight: 225)
+                .overlay{
+                    RoundedRectangle(cornerRadius: 30)
+                        .stroke(Color.black, lineWidth: 2)
+                }
+                .padding(.horizontal)
+            }
+        }
+        .searchable(text: $SearchCountry, prompt: "Search countries")
+        .navigationBarBackButtonHidden(true)
+        .ignoresSafeArea(edges: .top)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar{
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    currentTab = .Dashboard
+                } label: {
+                    Image(systemName: "house")
+                        .foregroundStyle(.black)
+                }
+            }
+            ToolbarItem(placement: .principal) {
+                Text("Wanderlust")
+                    .font(.title2)
+                    .bold()
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                HStack {
+                    Button {
+                        InfoPopup = true
+                        InfoTab = 1
+                    } label: {
+                        Image(systemName: "info.circle")
+                            .foregroundStyle(.black)
+                    }
+                }
+            }
+        }
+        .sheet(isPresented: $InfoPopup) {
+            InfoPopupView(InfoTab: InfoTab)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+        }
+        .padding(.vertical)
+    }
+    var CountryFilter: [String] {
+        if SearchCountry.isEmpty {
+            return Countries
+        }
+        else {
+            return Countries.filter { $0.localizedCaseInsensitiveContains(SearchCountry)
+            }
+        }
+    }
+}
+
+#Preview {
+    Passport(currentTab: .constant(.Passport), InfoTab: .constant(1))
 }
