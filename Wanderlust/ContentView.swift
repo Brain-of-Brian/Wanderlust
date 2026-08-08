@@ -17,7 +17,7 @@ struct ContentView: View {
                     Passport(currentTab: $CurrentTab, InfoTab: $InfoTab)
                 case .Trivia:
                     Trivia(currentTab: $CurrentTab, InfoTab: $InfoTab)
-
+                    
                 }
             }
         }
@@ -53,6 +53,13 @@ struct GuessingGame: View {
     @State private var InfoPopup: Bool = false
     @State private var MapPopup: Bool = false
     @Binding var InfoTab: Int
+    
+    @AppStorage("GamesPlayed") private var GamesPlayed: Int = 0
+    @AppStorage("GamesWon") private var GamesWon: Int = 0
+    @AppStorage("Streak") private var Streak: Int = 0
+    @AppStorage("HighestStreak") private var HighestStreak: Int = 0
+    
+    
     
     @Binding var DiscoveredLandmarks: [String]
     
@@ -199,11 +206,11 @@ struct GuessingGame: View {
     }
     
     func GetTileColor(for row: Int, at column: Int) -> Color {
-        guard row < CurrentAttempt else {
+        let Submitted = row < CurrentAttempt || (row == CurrentAttempt && GameOver)
+        guard Submitted else {
             return EmptyLetter
         }
-        
-        let word = guess[row]
+        let word = (row == CurrentAttempt && GameOver) ? CurrentGuess : guess[row]
         guard column < word.count else {
             return EmptyLetter
         }
@@ -222,7 +229,6 @@ struct GuessingGame: View {
         }
         return WrongLetter
     }
-    
     func GetKeyColor(for key: String) -> Color {
         if key.count > 1 {
             return Gray
@@ -307,7 +313,17 @@ struct GuessingGame: View {
     }
     
     func Stats(won: Bool) {
-        
+        GamesPlayed += 1
+        if won {
+            GamesWon += 1
+            Streak += 1
+            if Streak > HighestStreak {
+                HighestStreak = Streak
+            }
+        }
+        else {
+            Streak = 0
+        }
     }
 }
 
@@ -319,23 +335,31 @@ struct Dashboard: View {
     @Binding var currentTab: Tabs
     var body: some View {
         VStack {
-            Spacer()
             ZStack {
-                RoundedRectangle(cornerRadius: 30)
+                RoundedRectangle(cornerRadius: 5)
                     .stroke(Color.black, lineWidth: 2)
-                VStack {
-                    Text("Dashboard")
-                        .font(.title)// temp
-                    Button {
-                        currentTab = .Game
-                    } label: {
-                        Text("Guessing game") // temp
-                    }
+                    .frame(width: 300, height: 200)
+                Button {
+                    currentTab = .Game
+                } label: {
+                    Text("Guessing game") // temp
+                }
+            }
+            HStack {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 5)
+                        .stroke(Color.black, lineWidth: 2)
+                        .frame(width: 150, height: 200)
                     Button {
                         currentTab = .Passport
                     } label: {
                         Text("Passport") // temp
                     }
+                }
+                ZStack {
+                    RoundedRectangle(cornerRadius: 5)
+                        .stroke(Color.black, lineWidth: 2)
+                        .frame(width: 150, height: 200)
                     Button {
                         currentTab = .Trivia
                     } label: {
@@ -343,8 +367,32 @@ struct Dashboard: View {
                     }
                 }
             }
-            .frame(width: 200, height: 100)
-            Spacer()
+        }
+        .navigationBarBackButtonHidden(true)
+        .ignoresSafeArea(edges: .top)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar{
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                } label: {
+                    Image(systemName: "globe.fill")
+                        .foregroundStyle(.black)
+                }
+            }
+            ToolbarItem(placement: .principal) {
+                Text("Wanderlust")
+                    .font(.title2)
+                    .bold()
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                HStack {
+                    Button {
+                    } label: {
+                        Image(systemName: "globe.fill")
+                            .foregroundStyle(.black)
+                    }
+                }
+            }
         }
     }
 }
@@ -381,10 +429,13 @@ struct Passport: View {
                     RoundedRectangle(cornerRadius: 30)
                         .stroke(Color.black, lineWidth: 2)
                 }
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
                 .padding(.horizontal)
             }
         }
-        .searchable(text: $SearchCountry, prompt: "Search countries")
+        .listStyle(.plain)
+        .searchable(text: $SearchCountry, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search countries")
         .navigationBarBackButtonHidden(true)
         .ignoresSafeArea(edges: .top)
         .navigationBarTitleDisplayMode(.inline)
