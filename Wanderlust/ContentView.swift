@@ -16,7 +16,8 @@ struct ContentView: View {
                 case .Passport:
                     Passport(currentTab: $CurrentTab, InfoTab: $InfoTab)
                 case .Trivia:
-                    Text("trivia placeholder")
+                    Trivia(currentTab: $CurrentTab, InfoTab: $InfoTab)
+
                 }
             }
         }
@@ -34,6 +35,8 @@ enum Tabs {
     case Passport
     case Trivia
 }
+
+// finder guessing game
 struct GuessingGame: View {
     @State private var SecretWord: String = "PETRA" // test landmark
     @State private var guess: [String] = Array(repeating: "", count: 6)
@@ -311,7 +314,7 @@ struct GuessingGame: View {
 #Preview {
     GuessingGame(currentTab: .constant(.Game), InfoTab: .constant(0), DiscoveredLandmarks: .constant([]))
 }
-// Navigation Bar 1
+// finder dashboard
 struct Dashboard: View {
     @Binding var currentTab: Tabs
     var body: some View {
@@ -349,85 +352,7 @@ struct Dashboard: View {
 #Preview {
     Dashboard(currentTab: .constant(.Dashboard))
 }
-// Navigation Bar 3
-struct InfoPopupView: View {
-    @Binding var InfoTab: Int
-    var body: some View {
-        VStack {
-            if InfoTab == 0 {
-                Text("How to play")
-                    .font(.title)
-                    .bold()
-                Text("Placeholder")
-                Spacer()
-            }
-            else if InfoTab == 1 {
-                Text("What is passport?")
-                    .font(.title)
-                    .bold()
-                Spacer()
-            }
-            else if InfoTab == 2 {
-                Text("placeholder")
-                    .font(.title)
-                    .bold()
-            }
-            else {
-                Text("No info available")
-                    .font(.title)
-            }
-        }
-        .padding(.top, 20)
-    }
-}
-
-#Preview {
-    InfoPopupView(InfoTab: .constant(0))
-}
-// Navigation Bar 2
-struct MapPopupView: View {
-    @Binding var DiscoveredLandmarks: [String]
-    @Environment(\.dismiss) var Dismiss
-    
-    let landmarkCoordinates: [String: CLLocationCoordinate2D] = [
-        "PETRA": CLLocationCoordinate2D(latitude: 30.3285, longitude: 35.4444),
-        "LUXOR": CLLocationCoordinate2D(latitude: 25.6872, longitude: 32.6396),
-        "TULUM": CLLocationCoordinate2D(latitude: 20.2114, longitude: -87.4654),
-        "TOKYO": CLLocationCoordinate2D(latitude: 35.6762, longitude: 139.6503),
-        "ALAMO": CLLocationCoordinate2D(latitude: 29.4258, longitude: -98.4861),
-        "KYOTO": CLLocationCoordinate2D(latitude: 35.0116, longitude: 135.7681)]
-        var body: some View {
-            ZStack {
-                Map {
-                    ForEach(DiscoveredLandmarks, id: \.self) { landmark in
-                        if let coordinate = landmarkCoordinates[landmark] {
-                            Marker(landmark, coordinate: coordinate)
-                        }
-                    }
-                }
-                VStack {
-                    HStack {
-                        Spacer()
-                        Button {
-                            Dismiss()
-                        } label: {
-                            Text("Close")
-                                .bold()
-                                .foregroundStyle(.black)
-                        }
-                    }
-                    .padding(.horizontal)
-                    Spacer()
-                }
-                .padding(.vertical)
-            }
-        }
-}
-
-#Preview {
-    MapPopupView(DiscoveredLandmarks: .constant(["PETRA"]))
-}
-
+// finder passport
 struct Passport: View {
     @State private var InfoPopup: Bool = false
     @Binding var currentTab: Tabs
@@ -441,9 +366,9 @@ struct Passport: View {
                     Image(systemName: "Globe") // Will import images later on when I polish Passport
                     VStack{
                         HStack{
-                            Spacer()
                             Text(Country)
                                 .bold()
+                            Spacer()
                         }
                         .padding(.horizontal)
                         Spacer()
@@ -509,4 +434,203 @@ struct Passport: View {
 
 #Preview {
     Passport(currentTab: .constant(.Passport), InfoTab: .constant(1))
+}
+// finder trivia
+struct Trivia: View {
+    @Binding var currentTab: Tabs
+    @Binding var InfoTab: Int
+    @State private var InfoPopup: Bool = false
+    @State private var Offset: CGSize = .zero
+    @State private var CurrentIndex: Int = 0
+    @State private var DroppedAnswers: [Int?] = [nil, nil, nil, nil]
+    
+    let Questions = ["Test 1", "Test 2", "Test 3"]
+    var body: some View {
+        VStack {
+            HStack {
+                ForEach(0..<Questions.count, id: \.self) { index in
+                    RoundedRectangle(cornerRadius: 5)
+                        .strokeBorder(style: StrokeStyle(lineWidth: 2))
+                        .frame(width: 75, height: 75)
+                        .overlay (
+                            Group {
+                                if let QuestionIndex = DroppedAnswers[index] {
+                                    Text("Question\(QuestionIndex + 1)")
+                                        .font(.caption)
+                                        .bold()
+                                        .foregroundStyle(.black)
+                                } else {
+                                    Text("\(index + 1)")
+                                        .foregroundStyle(.black)
+                                }
+                            }
+                        )
+                }
+            }
+            .padding(.top, 50)
+            
+            Spacer()
+            
+            if CurrentIndex < Questions.count {
+                RoundedRectangle(cornerRadius: 40)
+                    .fill(Color.white)                .frame(width: 200, height: 150)
+                    .overlay(
+                        Text(Questions[CurrentIndex])
+                            .font(.headline)
+                            .foregroundStyle(.black)
+                            .multilineTextAlignment(.center)
+                            .padding()
+                    )
+                    .offset(Offset)
+                    .gesture(
+                        DragGesture()
+                            .onChanged { gesture in
+                                Offset = gesture.translation
+                            }
+                            .onEnded { gesture in
+                                if gesture.translation.height < -150 {
+                                    if let EmtpySlot = DroppedAnswers.firstIndex(where: {$0 == nil}) {
+                                        withAnimation(.spring()) {
+                                            DroppedAnswers[EmtpySlot] = CurrentIndex
+                                            CurrentIndex += 1
+                                            Offset = .zero
+                                        }
+                                    } else {
+                                        withAnimation(.spring()) {
+                                            Offset = .zero
+                                        }
+                                    }
+                                    
+                                }
+                                else {
+                                    withAnimation(.spring()) {
+                                        Offset = .zero
+                                    }
+                                }
+                            }
+                    )
+            } else {
+                Text("Everything answered")
+                    .font(.title)
+            }
+            Spacer()
+        }
+        .navigationBarBackButtonHidden(true)
+        .ignoresSafeArea(edges: .top)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar{
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    currentTab = .Dashboard
+                } label: {
+                    Image(systemName: "house")
+                        .foregroundStyle(.black)
+                }
+            }
+            ToolbarItem(placement: .principal) {
+                Text("Wanderlust")
+                    .font(.title2)
+                    .bold()
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                HStack {
+                    Button {
+                        InfoTab = 2
+                        InfoPopup = true
+                    } label: {
+                        Image(systemName: "info.circle")
+                            .foregroundStyle(.black)
+                    }
+                }
+            }
+        }
+        .sheet(isPresented: $InfoPopup) {
+            InfoPopupView(InfoTab: $InfoTab)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+        }
+        .padding(.vertical)
+    }
+}
+
+#Preview {
+    Trivia(currentTab: .constant(.Trivia), InfoTab: .constant(2))
+}
+// NavigationBar
+struct InfoPopupView: View {
+    @Binding var InfoTab: Int
+    var body: some View {
+        VStack {
+            if InfoTab == 0 {
+                Text("How to play")
+                    .font(.title)
+                    .bold()
+                Text("Placeholder")
+                Spacer()
+            }
+            else if InfoTab == 1 {
+                Text("What is passport?")
+                    .font(.title)
+                    .bold()
+                Spacer()
+            }
+            else if InfoTab == 2 {
+                Text("hahahahahahha")
+                    .font(.title)
+                    .bold()
+            }
+            else {
+                Text("No info available")
+                    .font(.title)
+            }
+        }
+        .padding(.top, 20)
+    }
+}
+
+#Preview {
+    InfoPopupView(InfoTab: .constant(0))
+}
+// NavigationBar
+struct MapPopupView: View {
+    @Binding var DiscoveredLandmarks: [String]
+    @Environment(\.dismiss) var Dismiss
+    
+    let landmarkCoordinates: [String: CLLocationCoordinate2D] = [
+        "PETRA": CLLocationCoordinate2D(latitude: 30.3285, longitude: 35.4444),
+        "LUXOR": CLLocationCoordinate2D(latitude: 25.6872, longitude: 32.6396),
+        "TULUM": CLLocationCoordinate2D(latitude: 20.2114, longitude: -87.4654),
+        "TOKYO": CLLocationCoordinate2D(latitude: 35.6762, longitude: 139.6503),
+        "ALAMO": CLLocationCoordinate2D(latitude: 29.4258, longitude: -98.4861),
+        "KYOTO": CLLocationCoordinate2D(latitude: 35.0116, longitude: 135.7681)]
+    var body: some View {
+        ZStack {
+            Map {
+                ForEach(DiscoveredLandmarks, id: \.self) { landmark in
+                    if let coordinate = landmarkCoordinates[landmark] {
+                        Marker(landmark, coordinate: coordinate)
+                    }
+                }
+            }
+            VStack {
+                HStack {
+                    Spacer()
+                    Button {
+                        Dismiss()
+                    } label: {
+                        Text("Close")
+                            .bold()
+                            .foregroundStyle(.black)
+                    }
+                }
+                .padding(.horizontal)
+                Spacer()
+            }
+            .padding(.vertical)
+        }
+    }
+}
+
+#Preview {
+    MapPopupView(DiscoveredLandmarks: .constant(["PETRA"]))
 }
