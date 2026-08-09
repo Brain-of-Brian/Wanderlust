@@ -47,7 +47,7 @@ struct GuessingGame: View {
     @State private var UsedLetters: [String: Color] = [:]
     
     @State private var InvalidLandmark: Bool = false
-    @State private var AvaliableLandmarks: [String] = ["PETRA", "LUXOR", "TULUM", "TOKYO"]
+    @State private var AvaliableLandmarks: [String] = ["PETRA", "LUXOR", "TULUM", "TOKYO", "ALAMO"]
     @Binding var currentTab: Tabs
     
     @State private var InfoPopup: Bool = false
@@ -646,6 +646,7 @@ struct InfoPopupView: View {
 struct MapPopupView: View {
     @Binding var DiscoveredLandmarks: [String]
     @Environment(\.dismiss) var Dismiss
+    @State private var SelectedLandmark: String? = nil
     
     let landmarkCoordinates: [String: CLLocationCoordinate2D] = [
         "PETRA": CLLocationCoordinate2D(latitude: 30.3285, longitude: 35.4444),
@@ -654,13 +655,52 @@ struct MapPopupView: View {
         "TOKYO": CLLocationCoordinate2D(latitude: 35.6762, longitude: 139.6503),
         "ALAMO": CLLocationCoordinate2D(latitude: 29.4258, longitude: -98.4861),
         "KYOTO": CLLocationCoordinate2D(latitude: 35.0116, longitude: 135.7681)]
+    let LandmarkDescriptions: [String: String] = [
+        "PETRA": "A famous archaeological site in Jordan's desert, carved entirely into pink sandstone cliffs.",
+        "LUXOR": "A sprawling open-air museum in Egypt, featuring the Karnak Temple and Valley of the Kings.",
+        "TULUM": "The site of a pre-Columbian Mayan walled city serving as a major port for Coba.",
+        "TOKYO": "Japan's busy capital, mixing ultramodern neon skyscrapers with historic temples.",
+        "ALAMO": "A historic Spanish mission and fortress compound in San Antonio, Texas.",
+        "KYOTO": "Famous for its numerous classical Buddhist temples, gardens, imperial palaces, and traditional wooden houses."
+    ]
     var body: some View {
         ZStack {
-            Map {
+            Map(selection: $SelectedLandmark) {
                 ForEach(DiscoveredLandmarks, id: \.self) { landmark in
                     if let coordinate = landmarkCoordinates[landmark] {
                         Marker(landmark, coordinate: coordinate)
+                            .tag(landmark)
                     }
+                }
+            }
+            .overlay(alignment: .center) {
+                if let selected = SelectedLandmark, let description = LandmarkDescriptions[selected] {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 5)
+                            .fill(.white)
+                            .opacity(0.4)
+                        VStack(alignment: .leading) {
+                            HStack {
+                                Text(selected)
+                                    .font(.title3)
+                                    .bold()
+                                Spacer()
+                            }
+                            Button {
+                                SelectedLandmark = nil
+                            } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundStyle(.black)
+                            }
+                        }
+                        Text(description)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    } .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .ignoresSafeArea()
+                        .padding()
+                        .padding()
+                        .padding()
                 }
             }
             VStack {
