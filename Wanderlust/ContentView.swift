@@ -335,38 +335,38 @@ struct Dashboard: View {
     @Binding var currentTab: Tabs
     var body: some View {
         VStack {
-            ZStack {
-                RoundedRectangle(cornerRadius: 5)
-                    .stroke(Color.black, lineWidth: 2)
-                    .frame(width: 300, height: 200)
-                Button {
+            Button {
                     currentTab = .Game
                 } label: {
                     Text("Guessing game") // temp
+                        .frame(width: 300, height: 200)
+                        .background(
+                            RoundedRectangle(cornerRadius: 5)
+                                .stroke(Color.black, lineWidth: 2)
+                        )
                 }
-            }
             HStack {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 5)
-                        .stroke(Color.black, lineWidth: 2)
-                        .frame(width: 150, height: 200)
                     Button {
                         currentTab = .Passport
                     } label: {
                         Text("Passport") // temp
+                            .frame(width: 150, height: 200)
+                            .background(
+                                RoundedRectangle(cornerRadius: 5)
+                                    .stroke(Color.black, lineWidth: 2)
+                            )
                     }
-                }
-                ZStack {
-                    RoundedRectangle(cornerRadius: 5)
-                        .stroke(Color.black, lineWidth: 2)
-                        .frame(width: 150, height: 200)
                     Button {
                         currentTab = .Trivia
                     } label: {
                         Text("Trivia") // temp
+                            .frame(width: 150, height: 200)
+                            .background(
+                                RoundedRectangle(cornerRadius: 5)
+                                    .stroke(Color.black, lineWidth: 2)
+                            )
                     }
                 }
-            }
         }
         .navigationBarBackButtonHidden(true)
         .ignoresSafeArea(edges: .top)
@@ -493,38 +493,16 @@ struct Trivia: View {
     @State private var InfoPopup: Bool = false
     @State private var Offset: CGSize = .zero
     @State private var CurrentIndex: Int = 0
-    @State private var DroppedAnswers: [Int?] = [nil, nil, nil, nil]
+    @State private var DroppedAnswers: [Int?] = [nil, nil, nil, nil, nil, nil]
     
-    let Questions = ["Test 1", "Test 2", "Test 3"]
+    let Questions = ["Test 1", "Test 2", "Test 3", "Test 4", "Test 5", "Test 6"]
     var body: some View {
         VStack {
-            HStack {
-                ForEach(0..<Questions.count, id: \.self) { index in
-                    RoundedRectangle(cornerRadius: 5)
-                        .strokeBorder(style: StrokeStyle(lineWidth: 2))
-                        .frame(width: 75, height: 75)
-                        .overlay (
-                            Group {
-                                if let QuestionIndex = DroppedAnswers[index] {
-                                    Text("Question\(QuestionIndex + 1)")
-                                        .font(.caption)
-                                        .bold()
-                                        .foregroundStyle(.black)
-                                } else {
-                                    Text("\(index + 1)")
-                                        .foregroundStyle(.black)
-                                }
-                            }
-                        )
-                }
-            }
-            .padding(.top, 50)
-            
-            Spacer()
-            
             if CurrentIndex < Questions.count {
-                RoundedRectangle(cornerRadius: 40)
-                    .fill(Color.white)                .frame(width: 200, height: 150)
+                Circle()
+                    .fill(Color.white)
+                    .frame(width: 200, height: 150)
+                    .border(Color.black, width: 1)
                     .overlay(
                         Text(Questions[CurrentIndex])
                             .font(.headline)
@@ -532,6 +510,7 @@ struct Trivia: View {
                             .multilineTextAlignment(.center)
                             .padding()
                     )
+                    .border(Color.black, width: 1)
                     .offset(Offset)
                     .gesture(
                         DragGesture()
@@ -564,7 +543,27 @@ struct Trivia: View {
                 Text("Everything answered")
                     .font(.title)
             }
-            Spacer()
+            HStack {
+                ForEach(0..<Questions.count, id: \.self) { index in
+                    RoundedRectangle(cornerRadius: 5)
+                        .strokeBorder(style: StrokeStyle(lineWidth: 2))
+                        .frame(width: 75, height: 75)
+                        .overlay (
+                            Group {
+                                if let QuestionIndex = DroppedAnswers[index] {
+                                    Text("Question\(QuestionIndex + 1)")
+                                        .font(.caption)
+                                        .bold()
+                                        .foregroundStyle(.black)
+                                } else {
+                                    Text("\(index + 1)")
+                                        .foregroundStyle(.black)
+                                }
+                            }
+                        )
+                }
+            }
+            .padding(.top, 50)
         }
         .navigationBarBackButtonHidden(true)
         .ignoresSafeArea(edges: .top)
