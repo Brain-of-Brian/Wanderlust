@@ -333,6 +333,7 @@ struct GuessingGame: View {
 // finder dashboard
 struct Dashboard: View {
     @Binding var currentTab: Tabs
+    @State var StatsView: Bool = false
     var body: some View {
         VStack {
             Button {
@@ -387,12 +388,18 @@ struct Dashboard: View {
             ToolbarItem(placement: .topBarTrailing) {
                 HStack {
                     Button {
+                        StatsView.toggle()
                     } label: {
-                        Image(systemName: "globe.fill")
+                        Image(systemName: "chart.bar.fill")
                             .foregroundStyle(.black)
                     }
                 }
             }
+        }
+        .sheet(isPresented: $StatsView) {
+            StatsPopupView()
+                .presentationDetents([.medium])
+                .presentationDragIndicator(.visible)
         }
     }
 }
@@ -724,3 +731,67 @@ struct MapPopupView: View {
 #Preview {
     MapPopupView(DiscoveredLandmarks: .constant(["PETRA"]))
 }
+
+struct StatsPopupView: View {
+    @AppStorage("GamesPlayed") private var GamesPlayed: Int = 0
+    @AppStorage("GamesWon") private var GamesWon: Int = 0
+    @AppStorage("Streak") private var Streak: Int = 0
+    @AppStorage("HighestStreak") private var HighestStreak: Int = 0
+    @Environment(\.dismiss) var Dismiss
+    var body: some View {
+        VStack {
+            HStack{
+                Text("All-time Stats")
+                    .font(.title2)
+                    .foregroundStyle(.black)
+                    .bold()
+                Spacer()
+                Button {
+                    Dismiss()
+                } label: {
+                    Image(systemName: "xmark")
+                        .foregroundStyle(.black)
+                        .font(.title3)
+                }
+            }
+            .padding(.horizontal)
+            
+            HStack {
+                Stats(title: "Played", value: "\(GamesPlayed)")
+                Stats(title: "Win Rate", value: GamesPlayed > 0 ?"\(Int(Double(GamesWon)/Double(GamesPlayed) * 100))%" : "0%")
+                Stats(title: "Streak", value: "\(Streak)")
+                Stats(title: "MaxStreak", value: "\(HighestStreak)")
+            }
+            .padding(.horizontal)
+            Spacer()
+        }
+        .padding(.top, 20)
+        
+    }
+    struct Stats: View {
+        let title: String
+        let value: String
+        var body: some View {
+            VStack {
+                Text(value)
+                    .font(.title)
+                    .foregroundStyle(.black)
+                    .bold()
+                Text(title)
+                    .font(.caption)
+                    .foregroundStyle(.black)
+                    .bold()
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 20)
+            .background(Color.black.opacity(0.1))
+            .cornerRadius(5)
+        }
+    }
+}
+
+#Preview {
+    StatsPopupView()
+}
+
+

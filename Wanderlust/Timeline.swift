@@ -10,3 +10,4 @@
 // Implementing the landmark location markers
 // Creating the trivia for Wanderlust
 // Re-polishing the dashboard with new design
+// Making a stats popup
