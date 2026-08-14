@@ -11,3 +11,5 @@
 // Creating the trivia for Wanderlust
 // Re-polishing the dashboard with new design
 // Making a stats popup
+// Working on the countries in passport
+// There is now over 1000 lines of code so I think it's time to move them into separate folders
