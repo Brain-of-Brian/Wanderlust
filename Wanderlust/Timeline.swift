@@ -13,3 +13,4 @@
 // Making a stats popup
 // Working on the countries in passport
 // There is now over 1000 lines of code so I think it's time to move them into separate folders
+// I reverted previous changes and I will redo the passport tab since I don't remmeber my original plan so I will just rewrite the code. Will continue next time, which is later today.
