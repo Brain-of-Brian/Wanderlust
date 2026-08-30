@@ -18,3 +18,4 @@
 // Followup session
 // Followup session 2: So confused on how to fix.
 // Followup sessionn 3: organizing and also rewriting code better for me: Very productive session, I believe I can finish within 2 more sessions max( Including finishing Trivia ) and then I will move onto improving the actual design of the game.
+// Followup session 4: Finished Passport and Game, next time will finish trivia and then work on the UI.
