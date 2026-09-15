@@ -8,7 +8,7 @@ struct Passport: View {
     @State private var InfoView: Bool = false
     
     var body: some View {
-        VStack {
+        NavigationStack {
             switch CurrentCountryPassport {
             case .none:
                 VStack {
@@ -36,7 +36,7 @@ struct Passport: View {
                 }
                 
             case .UnitedStates:
-                UnitedStatesView(CurrentCountryPassport: $CurrentCountryPassport, CurrentLandmarkLevel: $CurrentLandmarkLevel, InformationTab: $InformationTab)
+                UnitedStatesView(CurrentCountryPassport: $CurrentCountryPassport, CurrentLandmarkLevel: $CurrentLandmarkLevel, currentTab: $currentTab)
             case .Greece:
                 Text("Greece Screen")
             case .Italy:
@@ -72,7 +72,7 @@ struct Passport: View {
                 HStack {
                     Button {
                         InformationTab = 0
-                        InfoView = true
+                        InfoView.toggle()
                     } label: {
                         Image(systemName: "info.circle.fill")
                             .foregroundStyle(.black)
@@ -80,6 +80,12 @@ struct Passport: View {
                 }
             }
         }
+        .sheet(isPresented: $InfoView) {
+            InfoScreen(InformationTab: $InformationTab)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+        }
+
     }
 }
 

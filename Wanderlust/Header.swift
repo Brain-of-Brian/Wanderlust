@@ -17,7 +17,7 @@ struct Headerfile: View {
                 case .Passport:
                     Passport( CurrentCountryPassport: $CurrentCountryPassport, CurrentLandmarkLevel:$CurrentLandmarkLevel, currentTab: $CurrentTab, InformationTab: $InformationTab)
                 case .Trivia:
-                    Trivia(currentTab: $CurrentTab)
+                    Trivia(currentTab: $CurrentTab, InformationTab: $InformationTab)
                 }
             }
         }

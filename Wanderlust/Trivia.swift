@@ -2,6 +2,8 @@ import SwiftUI
 
 struct Trivia: View {
     @Binding var currentTab: Tabs
+    @Binding var InformationTab: Int
+    @State private var InfoView: Bool = false
     var body: some View {
         VStack {
             
@@ -26,7 +28,8 @@ struct Trivia: View {
             ToolbarItem(placement: .topBarTrailing) {
                 HStack {
                     Button {
-                        
+                        InformationTab = 5
+                        InfoView.toggle()
                     } label: {
                         Image(systemName: "info.circle.fill")
                             .foregroundStyle(.black)
@@ -34,9 +37,15 @@ struct Trivia: View {
                 }
             }
         }
+        .sheet(isPresented: $InfoView) {
+            InfoScreen(InformationTab: $InformationTab)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+        }
+
     }
 }
 
 #Preview {
-    Trivia(currentTab: .constant(.Trivia))
+    Trivia(currentTab: .constant(.Trivia), InformationTab: .constant(3))
 }
