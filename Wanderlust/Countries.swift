@@ -7,6 +7,7 @@ struct UnitedStatesView: View {
     
     @State private var AnswerText: String = ""
     @State private var Correct: Bool = false
+    @State private var InvalidAnswer: Bool = false
     
     var CorrectAnswer: String {
         switch CurrentLandmarkLevel {
