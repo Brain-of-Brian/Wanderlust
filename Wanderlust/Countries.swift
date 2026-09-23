@@ -3,83 +3,87 @@ import SwiftUI
 struct UnitedStatesView: View {
     @Binding var CurrentCountryPassport: CountryPassport
     @Binding var CurrentLandmarkLevel: LandmarkLevel
-    @State private var ChangeLevel: Int = 0
-    @Binding var currentTab: Tabs
-
+    @Binding var CurrentTab: Tabs
+    
+    @State private var AnswerText: String = ""
+    @State private var Correct: Bool = false
+    
+    var CorrectAnswer: String {
+        switch CurrentLandmarkLevel {
+        case .LevelOne:
+            return "STATUE OF LIBERTY"
+        case .LevelTwo:
+            return "GRAND CANYON"
+        case .LevelThree:
+            return "YELLOWSTONE"
+        }
+    }
+    
     var body: some View {
         VStack {
-//            if ChangeLevel == 0 {
-//                CurrentLandmarkLevel = .LevelOne
-//            }
-//            else if ChangeLevel == 1 {
-//                CurrentLandmarkLevel = .LevelTwo
-//            }
-//            else if ChangeLevel == 1 {
-//                CurrentLandmarkLevel = .LevelThree
-//            }
-////            else if ChangeLevel == 1 {
-////                CurrentLandmarkLevel = .levelFour
-////            }
-////            else if ChangeLevel == 1 {
-////                CurrentLandmarkLevel = .LevelFive
-////            }
-//            else {
-//                CurrentCountryPassport = .UnitedStates
-//            }
-            List {
-                Button {
-                    
-                } label: {
-                    
-                }
-                Button {
-                    
-                } label: {
-                    
-                }
-                Button {
-                    
-                } label: {
-                    
-                }
-                Button {
-                    
-                } label: {
-                    
-                }
+            Text("United States - Level \(CurrentLandmarkLevel.rawValue)")
+                .font(.title)
+                .padding()
+            
+            TextField("Enter Answer", text: $AnswerText)
+                .textFieldStyle(.roundedBorder)
+                .padding(.horizontal)
+            
+            Button {
+                Submit()
+            } label: {
+                Text("Submit")
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.gray.opacity(0.2))
+                    .cornerRadius(8)
             }
+            .padding(.horizontal)
+        }
+        .alert("Incorrect Answer", isPresented: $InvalidAnswer) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("Try again!")
+                .font(.caption)
         }
         .navigationBarBackButtonHidden(true)
         .ignoresSafeArea(edges: .top)
         .navigationBarTitleDisplayMode(.inline)
-//        .toolbar {
-//            ToolbarItem(placement: .topBarLeading) {
-//                Button {
-//                    currentTab = .Passport
-//                } label: {
-//                    Image(systemName: "arrow.backward")
-//                        .foregroundStyle(.black)
-//                }
-//            }
-//            ToolbarItem(placement: .principal) {
-//                Text("Wanderlust")
-//                    .font(.title2)
-//                    .bold()
-//            }
-//            ToolbarItem(placement: .topBarTrailing) {
-//                HStack {
-//                    Button {
-//                        
-//                    } label: {
-//                        Text("Hi")
-//                    }
-//                }
-//            }
-//        }
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                Text("Wanderlust")
+                    .font(.title2)
+                    .bold()
+            }
+        }
+    }
+    
+    func Submit() {
+        let UppercasedAnswer = AnswerText.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        
+        if UppercasedAnswer == CorrectAnswer {
+            Correct = true
+            
+            if CurrentLandmarkLevel == .LevelOne {
+                CurrentLandmarkLevel = .LevelTwo
+            }
+            else if CurrentLandmarkLevel == .LevelTwo {
+                CurrentLandmarkLevel = .LevelThree
+            }
+            else if CurrentLandmarkLevel == .LevelThree {
+                CurrentCountryPassport = .none
+                CurrentLandmarkLevel = .LevelOne
+            }
+            
+            AnswerText = ""
+        }
+        else {
+            Correct = false
+            InvalidAnswer = true
+        }
     }
 }
 
 #Preview {
-    UnitedStatesView(CurrentCountryPassport: .constant(.UnitedStates), CurrentLandmarkLevel: .constant(.LevelOne), currentTab: .constant(.Passport))
+    UnitedStatesView(CurrentCountryPassport: .constant(.UnitedStates), CurrentLandmarkLevel: .constant(.LevelOne), CurrentTab: .constant(.Passport))
 }
-

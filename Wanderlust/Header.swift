@@ -2,6 +2,7 @@ import SwiftUI
 
 struct Headerfile: View {
     @State private var InformationTab: Int = 0
+    @State private var ChangeLevel: Int = 0
     @State private var CurrentTab: Tabs = .Game
     @State private var CurrentLandmarkLevel: LandmarkLevel = .LevelOne
     @State private var CurrentCountryPassport: CountryPassport = .none

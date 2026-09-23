@@ -5,6 +5,8 @@ struct Trivia: View {
     @Binding var InformationTab: Int
     @State private var InfoView: Bool = false
     var body: some View {
+        ZStack {
+            HeavyFogBackground()
         VStack {
             
         }
@@ -17,13 +19,15 @@ struct Trivia: View {
                     currentTab = .Dashboard
                 } label: {
                     Image(systemName: "arrow.backward")
-                        .foregroundStyle(.black)
+                        .foregroundStyle(.white)
                 }
             }
             ToolbarItem(placement: .principal) {
                 Text("Wanderlust")
                     .font(.title2)
                     .bold()
+                    .foregroundStyle(.white)
+                    
             }
             ToolbarItem(placement: .topBarTrailing) {
                 HStack {
@@ -32,7 +36,7 @@ struct Trivia: View {
                         InfoView.toggle()
                     } label: {
                         Image(systemName: "info.circle.fill")
-                            .foregroundStyle(.black)
+                            .foregroundStyle(.white)
                     }
                 }
             }
@@ -42,8 +46,9 @@ struct Trivia: View {
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
         }
-
+        
     }
+}
 }
 
 #Preview {

@@ -40,6 +40,8 @@ struct Game: View {
     ]
     
     var body: some View {
+        ZStack {
+            HeavyFogBackground()
         VStack {
             VStack(spacing: 8) {
                 ForEach(0..<6, id: \.self) { row in
@@ -58,13 +60,13 @@ struct Game: View {
                             Text(letter)
                                 .font(.title)
                                 .bold()
-                                .foregroundStyle(.black)
+                                .foregroundStyle(.white)
                                 .frame(width: 50, height: 60)
                                 .background(row < CurrentAttempt ? LetterColor(guess: Guess[row], index: Column) : EmptyLetter)
                                 .cornerRadius(4)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 4)
-                                        .stroke(Color.black, lineWidth: 1)
+                                        .stroke(Color.white, lineWidth: 1)
                                 )
                         }
                     }
@@ -73,7 +75,7 @@ struct Game: View {
             .padding(.vertical)
             .padding(.vertical)
             .padding(.vertical)
-                        
+            
             VStack(spacing: 6) {
                 ForEach(KeyboardRows, id: \.self) { row in
                     HStack {
@@ -85,11 +87,11 @@ struct Game: View {
                                     .font(.system(size: letter.count > 1 ? 12 : 18, weight: .bold))
                                     .frame(minWidth: letter.count > 1 ? 45 : 28, minHeight: 45)
                                     .background(UsedLetters[letter] ?? Gray)
-                                    .foregroundStyle(.black)
+                                    .foregroundStyle(.white)
                                     .cornerRadius(4)
                                     .overlay(
                                         RoundedRectangle(cornerRadius: 4)
-                                            .stroke(Color.black, lineWidth: 1)
+                                            .stroke(Color.white, lineWidth: 1)
                                     )
                             }
                             .buttonStyle(.plain)
@@ -131,13 +133,14 @@ struct Game: View {
                     currentTab = .Dashboard
                 } label: {
                     Image(systemName: "arrow.backward")
-                        .foregroundStyle(.black)
+                        .foregroundStyle(.white)
                 }
             }
             ToolbarItem(placement: .principal) {
                 Text("Wanderlust")
                     .font(.title2)
                     .bold()
+                    .foregroundStyle(.white)
             }
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
@@ -145,7 +148,7 @@ struct Game: View {
                     InfoView = true
                 } label: {
                     Image(systemName: "info.circle.fill")
-                        .foregroundStyle(.black)
+                        .foregroundStyle(.white)
                 }
             }
         }
@@ -153,7 +156,9 @@ struct Game: View {
             InfoScreen(InformationTab: $InformationTab)
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
+                .foregroundStyle(.white)
         }
+    }
     }
     
     func DailyLandmark() -> String {

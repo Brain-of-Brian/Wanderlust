@@ -8,6 +8,8 @@ struct Passport: View {
     @State private var InfoView: Bool = false
     
     var body: some View {
+        ZStack {
+            HeavyFogBackground()
         NavigationStack {
             switch CurrentCountryPassport {
             case .none:
@@ -36,13 +38,18 @@ struct Passport: View {
                 }
                 
             case .UnitedStates:
-                UnitedStatesView(CurrentCountryPassport: $CurrentCountryPassport, CurrentLandmarkLevel: $CurrentLandmarkLevel, currentTab: $currentTab)
+                UnitedStatesView(CurrentCountryPassport: $CurrentCountryPassport, CurrentLandmarkLevel: $CurrentLandmarkLevel, CurrentTab: $currentTab)
+                
             case .Greece:
-                Text("Greece Screen")
+                Text("greece")
+                
+                
             case .Italy:
-                Text("Italy Screen")
+                Text("Italy")
+                
+                
             case .China:
-                Text("China Screen")
+                Text("china")
             }
         }
         .navigationBarBackButtonHidden(true)
@@ -57,16 +64,17 @@ struct Passport: View {
                     else {
                         CurrentCountryPassport = .none
                     }
-
+                    
                 } label: {
                     Image(systemName: "arrow.backward")
-                        .foregroundStyle(.black)
+                        .foregroundStyle(.white)
                 }
             }
             ToolbarItem(placement: .principal) {
                 Text("Wanderlust")
                     .font(.title2)
                     .bold()
+                    .foregroundStyle(.white)
             }
             ToolbarItem(placement: .topBarTrailing) {
                 HStack {
@@ -75,7 +83,7 @@ struct Passport: View {
                         InfoView.toggle()
                     } label: {
                         Image(systemName: "info.circle.fill")
-                            .foregroundStyle(.black)
+                            .foregroundStyle(.white)
                     }
                 }
             }
@@ -85,8 +93,9 @@ struct Passport: View {
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
         }
-
+        
     }
+}
 }
 
 #Preview {
