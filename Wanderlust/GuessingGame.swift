@@ -32,6 +32,9 @@ struct Game: View {
     @State private var CurrentAttempt: Int = 0
     @State private var UsedLetters: [String: Color] = [:]
     
+    @State private var WinAlert: Bool = false
+    @State private var GameOverAlert: Bool = false
+    
     let AvaliableLandmarks: [String] = ["PETRA", "LUXOR", "TULUM", "TOKYO", "ALAMO"]
     let AllowedLandmarks: [String] = ["PETRA", "LUXOR", "TULUM", "TOKYO", "ALAMO"]
     
@@ -120,19 +123,18 @@ struct Game: View {
             Text("If this is a specific landmark you want to add to the game, please submit a suggestion in the feedback form.")
                 .font(.caption)
         }
-        .alert("Congratulations!", isPresented: $GameWon) {
-            Button("OK", role: .cancel) { }
+        .alert("Congratulations!", isPresented: $WinAlert) {
+            Button("OK", role: .cancel){}
         } message: {
             Text("You guessed the landmark correctly! You can view your stats in the dashboard.")
                 .font(.caption)
         }
-        .alert("Game Over", isPresented: $GameOver) {
-            Button("OK", role: .cancel) { }
+        .alert("Game Over", isPresented: $GameOverAlert) {
+            Button("OK", role: .cancel){}
         } message: {
             Text("Try again tomorrow! The correct landmark was \"\(SecretWord)\".")
                 .font(.caption)
-        }
-        .navigationBarBackButtonHidden(true)
+        }        .navigationBarBackButtonHidden(true)
         .ignoresSafeArea(edges: .top)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -179,7 +181,6 @@ struct Game: View {
     func Submit() {
         let UppercasedGuess = CurrentGuess.uppercased()
         guard CurrentGuess.count == 5 else { return }
-        
         guard AllowedLandmarks.contains(UppercasedGuess) else {
             InvalidLandmark = true
             return
@@ -196,20 +197,22 @@ struct Game: View {
                 HighestStreak = CurrentStreak
             }
             GameWon = true
+            WinAlert = true
             LastPlayed = Today()
             if !DiscoveredLandmarks.contains(UppercasedGuess) {
                 DiscoveredLandmarks.append(UppercasedGuess)
             }
+            CurrentAttempt += 1
             CurrentGuess = ""
-
             SaveGame()
-
         } else if CurrentAttempt == 5 {
 
             GameOver = true
+            GameOverAlert = true
             GamesPlayed += 1
             CurrentStreak = 0
             LastPlayed = Today()
+            CurrentAttempt += 1
             CurrentGuess = ""
 
             SaveGame()
@@ -223,7 +226,7 @@ struct Game: View {
     }
     
     func Input(_ letters: String) {
-
+        guard !GameWon && !GameOver else { return }
         if letters == "ENTER" {
             Submit()
         } else if letters == "⌫" {
@@ -237,25 +240,47 @@ struct Game: View {
     }
     
     func LetterColor(guess: String, index: Int) -> Color {
-        let Guessed = Array(guess)
-        let SecretArray = Array(SecretWord.uppercased())
-        guard index < Guessed.count, index < SecretArray.count else {
+
+        let Colors = LetterColors(for: guess)
+
+        guard index < Colors.count else {
+
             return EmptyLetter
         }
-        let letter = Guessed[index]
-        if letter == SecretArray[index] {
-            return CorrectLetter
-        } else if SecretArray.contains(letter) {
-            return MisplacedLetter
-        } else {
-            return WrongLetter
-        }
+
+        return Colors[index]
     }
-    
+    func LetterColors(for guess: String) -> [Color] {
+        let Guessed = Array(guess.uppercased())
+        let SecretArray = Array(SecretWord.uppercased())
+        var Colors = Array(repeating: WrongLetter, count: Guessed.count)
+        var RemainingLetters: [Character: Int] = [:]
+        for letter in SecretArray {
+            RemainingLetters[letter, default: 0] += 1
+        }
+        for i in Guessed.indices {
+            if i < SecretArray.count && Guessed[i] == SecretArray[i] {
+                Colors[i] = CorrectLetter
+                RemainingLetters[Guessed[i], default: 0] -= 1
+            }
+        }
+        for i in Guessed.indices {
+            if Colors[i] == CorrectLetter {
+                continue
+            }
+            let letter = Guessed[i]
+            if RemainingLetters[letter, default: 0] > 0 {
+                Colors[i] = MisplacedLetter
+                RemainingLetters[letter, default: 0] -= 1
+            }
+        }
+        return Colors
+    }
     func UpdatedColors(for guess: String) {
+        let Colors = LetterColors(for: guess)
         for (i, char) in Array(guess).enumerated() {
             let letter = String(char)
-            let color = LetterColor(guess: guess, index: i)
+            let color = Colors[i]
             if UsedLetters[letter] != CorrectLetter {
                 UsedLetters[letter] = color
             }
