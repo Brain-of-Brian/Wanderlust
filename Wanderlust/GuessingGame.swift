@@ -19,6 +19,14 @@ struct Game: View {
     @AppStorage("GamesPlayed") var GamesPlayed: Int = 0
     @AppStorage("LastPlayed") private var LastPlayed: String = ""
     
+    @AppStorage("SavedSecretWord") private var SavedSecretWord: String = ""
+    @AppStorage("SavedCurrentGuess") private var SavedCurrentGuess: String = ""
+    @AppStorage("SavedGuess") private var SavedGuess: String = ""
+    @AppStorage("SavedCurrentAttempt") private var SavedCurrentAttempt: Int = 0
+    @AppStorage("SavedGameWon") private var SavedGameWon: Bool = false
+    @AppStorage("SavedGameOver") private var SavedGameOver: Bool = false
+    @AppStorage("SavedGameDate") private var SavedGameDate: String = ""
+    
     @State private var CurrentGuess: String = ""
     @State private var Guess: [String] = Array(repeating: "", count: 6)
     @State private var CurrentAttempt: Int = 0
@@ -193,19 +201,29 @@ struct Game: View {
                 DiscoveredLandmarks.append(UppercasedGuess)
             }
             CurrentGuess = ""
+
+            SaveGame()
+
         } else if CurrentAttempt == 5 {
+
             GameOver = true
             GamesPlayed += 1
             CurrentStreak = 0
             LastPlayed = Today()
             CurrentGuess = ""
+
+            SaveGame()
+
         } else {
             CurrentAttempt += 1
             CurrentGuess = ""
+
+            SaveGame()
         }
     }
     
     func Input(_ letters: String) {
+
         if letters == "ENTER" {
             Submit()
         } else if letters == "⌫" {
@@ -215,6 +233,7 @@ struct Game: View {
         } else if CurrentGuess.count < 5 {
             CurrentGuess.append(letters.uppercased())
         }
+        SaveGame()
     }
     
     func LetterColor(guess: String, index: Int) -> Color {
@@ -252,20 +271,45 @@ struct Game: View {
         GameWon = false
         GameOver = false
     }
-    
     func Today() -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "MM-dd-yyyy"
         return formatter.string(from: Date())
     }
-    
-    func DailyReset() {
-        SecretWord = DailyLandmark().uppercased()
-        let currentDay = Today()
-        if LastPlayed == currentDay {
-            GameOver = true
+    func SaveGame() {
+        SavedSecretWord = SecretWord
+        SavedCurrentGuess = CurrentGuess
+        SavedGuess = Guess.joined(separator: "|")
+        SavedCurrentAttempt = CurrentAttempt
+        SavedGameWon = GameWon
+        SavedGameOver = GameOver
+        SavedGameDate = Today()
+    }
+    func LoadGame() {
+        SecretWord = SavedSecretWord
+        CurrentGuess = SavedCurrentGuess
+        CurrentAttempt = SavedCurrentAttempt
+        GameWon = SavedGameWon
+        GameOver = SavedGameOver
+
+        if SavedGuess.isEmpty {
+            Guess = Array(repeating: "", count: 6)
         } else {
-            Reset()
+            Guess = SavedGuess.components(separatedBy: "|")
+        }
+        UsedLetters = [:]
+
+        for guess in Guess where !guess.isEmpty {
+            UpdatedColors(for: guess)
         }
     }
-}
+    func DailyReset() {
+        let currentDay = Today()
+
+        if SavedGameDate == currentDay {
+            LoadGame()
+        } else {
+            Reset()
+            SaveGame()
+        }
+    }}
