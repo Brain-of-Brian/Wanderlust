@@ -1,4 +1,5 @@
 import SwiftUI
+import MapKit
 
 struct Headerfile: View {
     @State private var InformationTab: Int = 0
@@ -85,4 +86,60 @@ struct InfoScreen: View {
 }
 #Preview {
     InfoScreen(InformationTab: .constant(0))
+}
+
+struct Landmark {
+
+    let Name: String
+    let Latitude: Double
+    let Longitude: Double
+
+}
+
+let Landmarks: [Landmark] = [
+
+    Landmark(Name: "PETRA", Latitude: 30.3285, Longitude: 35.4444),
+
+    Landmark(Name: "LUXOR", Latitude: 25.6872, Longitude: 32.6396),
+
+    Landmark(Name: "TULUM", Latitude: 20.2114, Longitude: -87.4654),
+
+    Landmark(Name: "TOKYO", Latitude: 35.6762, Longitude: 139.6503),
+
+    Landmark(Name: "ALAMO", Latitude: 29.4259, Longitude: -98.4861)
+
+]
+
+struct MapView: View {
+
+    @Binding var DiscoveredLandmarks: [String]
+
+    @State private var Position: MapCameraPosition = .automatic
+
+    var body: some View {
+
+        Map(position: $Position) {
+
+            ForEach(Landmarks, id: \.Name) { Landmark in
+
+                if DiscoveredLandmarks.contains(Landmark.Name) {
+
+                    Marker(
+                        Landmark.Name,
+                        coordinate: CLLocationCoordinate2D(
+                            latitude: Landmark.Latitude,
+                            longitude: Landmark.Longitude
+                        )
+                    )
+
+                }
+
+            }
+
+        }
+        .navigationTitle("Map")
+        .navigationBarTitleDisplayMode(.inline)
+
+    }
+
 }

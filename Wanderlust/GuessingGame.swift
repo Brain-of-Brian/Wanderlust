@@ -1,13 +1,17 @@
 import SwiftUI
 
 struct Game: View {
+    
+    let AvaliableLandmarks: [String] = Landmarks.map { $0.Name }
+    let AllowedLandmarks: [String] = Landmarks.map { $0.Name }
+    
     @State private var SecretWord: String = ""
     @Binding var currentTab: Tabs
     @Binding var InformationTab: Int
     @Binding var DiscoveredLandmarks: [String]
     
     @State private var InfoView: Bool = false
-    @State private var map: Bool = false
+    @State private var ShowMap: Bool = false
     @State private var InvalidLandmark: Bool = false
     
     @State private var GameWon: Bool = false
@@ -35,8 +39,6 @@ struct Game: View {
     @State private var WinAlert: Bool = false
     @State private var GameOverAlert: Bool = false
     
-    let AvaliableLandmarks: [String] = ["PETRA", "LUXOR", "TULUM", "TOKYO", "ALAMO"]
-    let AllowedLandmarks: [String] = ["PETRA", "LUXOR", "TULUM", "TOKYO", "ALAMO"]
     
     let CorrectLetter: Color = Color(red: 0.1, green: 0.35, blue: 0.2)
     let MisplacedLetter: Color = Color(red: 0.6, green: 0.5, blue: 0.1)
@@ -153,6 +155,13 @@ struct Game: View {
                     .foregroundStyle(.white)
             }
             ToolbarItem(placement: .topBarTrailing) {
+                HStack {
+                    Button {
+                        ShowMap = true
+                    } label: {
+                        Image(systemName: "map.fill")
+                            .foregroundStyle(.white)
+                    }
                 Button {
                     InformationTab = 0
                     InfoView = true
@@ -161,12 +170,18 @@ struct Game: View {
                         .foregroundStyle(.white)
                 }
             }
+            }
         }
         .sheet(isPresented: $InfoView) {
             InfoScreen(InformationTab: $InformationTab)
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
                 .foregroundStyle(.white)
+        }
+        .sheet(isPresented: $ShowMap) {
+            MapView(DiscoveredLandmarks: $DiscoveredLandmarks)
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
         }
     }
     }
@@ -187,6 +202,9 @@ struct Game: View {
         }
         
         Guess[CurrentAttempt] = UppercasedGuess
+        if !DiscoveredLandmarks.contains(UppercasedGuess) {
+            DiscoveredLandmarks.append(UppercasedGuess)
+        }
         UpdatedColors(for: UppercasedGuess)
         
         if UppercasedGuess == SecretWord.uppercased() {
