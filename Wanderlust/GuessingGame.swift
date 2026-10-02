@@ -54,7 +54,19 @@ struct Game: View {
     
     var body: some View {
         ZStack {
-            HeavyFogBackground()
+            Color(red: 0.035, green: 0.04, blue: 0.037)
+                    .ignoresSafeArea()
+
+                RadialGradient(
+                    colors: [
+                        Color(red: 0.12, green: 0.16, blue: 0.12).opacity(0.35),
+                        Color.clear
+                    ],
+                    center: .topLeading,
+                    startRadius: 50,
+                    endRadius: 500
+                )
+                .ignoresSafeArea()
         VStack {
             VStack(spacing: 8) {
                 ForEach(0..<6, id: \.self) { row in
@@ -258,14 +270,10 @@ struct Game: View {
     }
     
     func LetterColor(guess: String, index: Int) -> Color {
-
         let Colors = LetterColors(for: guess)
-
         guard index < Colors.count else {
-
             return EmptyLetter
         }
-
         return Colors[index]
     }
     func LetterColors(for guess: String) -> [Color] {
@@ -348,11 +356,11 @@ struct Game: View {
     }
     func DailyReset() {
         let currentDay = Today()
-
         if SavedGameDate == currentDay {
             LoadGame()
         } else {
             Reset()
+            DiscoveredLandmarks = []
             SaveGame()
         }
     }}

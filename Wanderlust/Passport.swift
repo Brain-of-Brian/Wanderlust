@@ -9,7 +9,19 @@ struct Passport: View {
     
     var body: some View {
         ZStack {
-            HeavyFogBackground()
+            Color(red: 0.035, green: 0.04, blue: 0.037)
+                    .ignoresSafeArea()
+
+                RadialGradient(
+                    colors: [
+                        Color(red: 0.12, green: 0.16, blue: 0.12).opacity(0.35),
+                        Color.clear
+                    ],
+                    center: .topLeading,
+                    startRadius: 50,
+                    endRadius: 500
+                )
+                .ignoresSafeArea()
         NavigationStack {
             switch CurrentCountryPassport {
             case .none:
