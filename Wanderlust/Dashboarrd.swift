@@ -1,8 +1,19 @@
 import SwiftUI
+import MapKit
 
 struct Dashboard: View {
     @Binding var CurrentTab: Tabs
     @State private var ShowStats: Bool = false
+    
+    @State private var Position: MapCameraPosition = .region(
+        MKCoordinateRegion(
+            center: CLLocationCoordinate2D(latitude: 20, longitude: 0),
+            span: MKCoordinateSpan(
+                latitudeDelta: 140,
+                longitudeDelta: 140
+            )
+        )
+    )
     var body: some View {
         NavigationStack {
             ZStack {
@@ -21,6 +32,10 @@ struct Dashboard: View {
                     .ignoresSafeArea()
                 VStack {
                     
+                    TravelMapView()
+                        .frame(height: 300)
+                        .cornerRadius(20)
+                        .padding(1)
                     Button {
                         CurrentTab = .Game
                     } label: {
@@ -56,6 +71,8 @@ struct Dashboard: View {
                     }
                 }
             }
+            .toolbarBackground(.clear, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
@@ -77,4 +94,34 @@ struct Dashboard: View {
 
 #Preview {
     Dashboard(CurrentTab: .constant(.Dashboard))
+}
+
+struct TravelMapView: View {
+    @AppStorage("VisitedLandmarks") private var VisitedLandmarks: String = ""
+
+    @State private var Position: MapCameraPosition = .region(
+        MKCoordinateRegion(
+            center: CLLocationCoordinate2D(latitude: 20, longitude: 0),
+            span: MKCoordinateSpan(
+                latitudeDelta: 140,
+                longitudeDelta: 140
+            )
+        )
+    )
+
+    var body: some View {
+        Map(position: $Position) {
+            ForEach(Landmarks, id: \.Name) { Landmark in
+                if VisitedLandmarks.components(separatedBy: "|").contains(Landmark.Name) {
+                    Marker(
+                        Landmark.Name,
+                        coordinate: CLLocationCoordinate2D(
+                            latitude: Landmark.Latitude,
+                            longitude: Landmark.Longitude
+                        )
+                    )
+                }
+            }
+        }
+    }
 }

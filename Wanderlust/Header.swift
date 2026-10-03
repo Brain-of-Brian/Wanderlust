@@ -105,9 +105,8 @@ let Landmarks: [Landmark] = [
 
 struct MapView: View {
     @Binding var DiscoveredLandmarks: [String]
-    @State private var Position: MapCameraPosition = .automatic
     var body: some View {
-        Map(position: $Position) {
+        Map() {
             ForEach(Landmarks, id: \.Name) { Landmark in
                 if DiscoveredLandmarks.contains(Landmark.Name) {
                     Marker(

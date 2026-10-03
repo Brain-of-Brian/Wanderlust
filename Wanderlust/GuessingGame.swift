@@ -31,6 +31,8 @@ struct Game: View {
     @AppStorage("SavedGameOver") private var SavedGameOver: Bool = false
     @AppStorage("SavedGameDate") private var SavedGameDate: String = ""
     
+    @AppStorage("VisitedLandmarks") private var VisitedLandmarks: String = ""
+    
     @State private var CurrentGuess: String = ""
     @State private var Guess: [String] = Array(repeating: "", count: 6)
     @State private var CurrentAttempt: Int = 0
@@ -220,6 +222,7 @@ struct Game: View {
         UpdatedColors(for: UppercasedGuess)
         
         if UppercasedGuess == SecretWord.uppercased() {
+            SaveDailyLandmark()
             GamesPlayed += 1
             GamesWon += 1
             CurrentStreak += 1
@@ -235,8 +238,9 @@ struct Game: View {
             CurrentAttempt += 1
             CurrentGuess = ""
             SaveGame()
+            
         } else if CurrentAttempt == 5 {
-
+            SaveDailyLandmark()
             GameOver = true
             GameOverAlert = true
             GamesPlayed += 1
@@ -254,7 +258,19 @@ struct Game: View {
             SaveGame()
         }
     }
-    
+    func SaveDailyLandmark() {
+        var SavedLandmarks: [String] = []
+
+        if !VisitedLandmarks.isEmpty {
+            SavedLandmarks = VisitedLandmarks.components(separatedBy: "|")
+        }
+
+        if !SavedLandmarks.contains(SecretWord) {
+            SavedLandmarks.append(SecretWord)
+        }
+
+        VisitedLandmarks = SavedLandmarks.joined(separator: "|")
+    }
     func Input(_ letters: String) {
         guard !GameWon && !GameOver else { return }
         if letters == "ENTER" {

@@ -91,7 +91,7 @@ struct Passport: View {
             ToolbarItem(placement: .topBarTrailing) {
                 HStack {
                     Button {
-                        InformationTab = 0
+                        InformationTab = 1
                         InfoView.toggle()
                     } label: {
                         Image(systemName: "info.circle.fill")

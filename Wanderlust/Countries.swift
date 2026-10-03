@@ -24,11 +24,16 @@ struct UnitedStatesView: View {
         VStack {
             Text("United States - Level \(CurrentLandmarkLevel.rawValue)")
                 .font(.title)
+                .padding(.horizontal)
+                .foregroundStyle(.white)
+            RoundedRectangle(cornerRadius: 5)
+                .foregroundStyle(.white)
+                .frame(width: 400, height: 400)
                 .padding()
-            
             TextField("Enter Answer", text: $AnswerText)
                 .textFieldStyle(.roundedBorder)
                 .padding(.horizontal)
+                .foregroundStyle(.white)
             
             Button {
                 Submit()
